@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle\ValueObject;
 
 use Doctrine\ORM\Mapping as ORM;
+use Survos\ShapeContracts\Length;
+use Survos\ShapeContracts\Shape;
+use Survos\ShapeContracts\Unit;
 
 #[ORM\Embeddable]
 final class Dimensions implements \Stringable
@@ -26,37 +29,53 @@ final class Dimensions implements \Stringable
         }
     }
 
-    // PHP 8.4 virtual properties for typed axis access
-    public ?Dimension $width  { get => $this->widthMm  !== null ? new Dimension($this->widthMm)  : null; }
-    public ?Dimension $height { get => $this->heightMm !== null ? new Dimension($this->heightMm) : null; }
-    public ?Dimension $depth  { get => $this->depthMm  !== null ? new Dimension($this->depthMm)  : null; }
+    public ?Length $width { get => Length::fromMillimeters($this->widthMm); }
+    public ?Length $height { get => Length::fromMillimeters($this->heightMm); }
+    public ?Length $depth { get => Length::fromMillimeters($this->depthMm); }
 
-    /** Area in mm². Null when width or height is missing. */
     public ?int $area {
         get => $this->widthMm !== null && $this->heightMm !== null
             ? $this->widthMm * $this->heightMm
             : null;
     }
 
-    /** Volume in mm³. Null when any axis is missing. */
     public ?int $volume {
         get => $this->widthMm !== null && $this->heightMm !== null && $this->depthMm !== null
             ? $this->widthMm * $this->heightMm * $this->depthMm
             : null;
     }
 
-    public bool $is2D    { get => $this->depthMm === null; }
+    public bool $is2D { get => $this->depthMm === null; }
     public bool $isEmpty { get => $this->widthMm === null && $this->heightMm === null && $this->depthMm === null; }
 
-    /** Depth below this threshold (mm) counts as "flat" — e.g., a sheet of paper. */
+    public static function fromShape(Shape $shape): self
+    {
+        return new self(
+            widthMm: $shape->width?->millimeters,
+            heightMm: $shape->height?->millimeters,
+            depthMm: $shape->depth?->millimeters ?? $shape->length?->millimeters ?? $shape->thickness?->millimeters,
+        );
+    }
+
+    public function toShape(?string $label = null, ?string $source = null): Shape
+    {
+        return Shape::fromMillimeters(
+            widthMm: $this->widthMm,
+            heightMm: $this->heightMm,
+            depthMm: $this->depthMm,
+            label: $label,
+            source: $source,
+        );
+    }
+
     public function isFlat(int $thresholdMm = 5): bool
     {
         return $this->depthMm === null || $this->depthMm < $thresholdMm;
     }
 
-    /** Format using the given unit. Locale-independent (explicit decimal point). */
-    public function format(Unit $unit = Unit::CM, int $precision = 1): string
+    public function format(Unit|string $unit = Unit::CM, int $precision = 1): string
     {
+        $unit = is_string($unit) ? Unit::fromAlias($unit) : $unit;
         $parts = [];
         foreach ([$this->widthMm, $this->heightMm, $this->depthMm] as $mm) {
             if ($mm === null) {
@@ -67,6 +86,7 @@ final class Dimensions implements \Stringable
         if (!$parts) {
             return '';
         }
+
         return implode(' × ', $parts) . ' ' . $unit->symbol();
     }
 

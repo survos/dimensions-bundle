@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle\Form;
 
 use Survos\DimensionsBundle\ValueObject\Dimensions;
-use Survos\DimensionsBundle\ValueObject\Unit;
+use Survos\ShapeContracts\Unit;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -25,7 +25,7 @@ final class DimensionsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $displayUnit = Unit::from($options['display_unit']);
+        $displayUnit = Unit::fromAlias($options['display_unit']);
         $sym         = $displayUnit->symbol();
 
         $numberOpts = ['required' => false, 'scale' => 4, 'attr' => ['step' => 'any', 'min' => '0']];
@@ -38,11 +38,9 @@ final class DimensionsType extends AbstractType
             $builder->add('depth', NumberType::class, array_merge($numberOpts, ['label' => "Depth ({$sym})"]));
         }
 
-        $toDisplay = static fn (?int $mm) use ($displayUnit): ?float
-            => $mm !== null ? round($mm / $displayUnit->toMillimeters(), 4) : null;
+        $toDisplay = static fn (?int $mm): ?float => $mm !== null ? round($mm / $displayUnit->toMillimeters(), 4) : null;
 
-        $toMm = static fn (mixed $v) use ($displayUnit): ?int
-            => ($v !== null && $v !== '') ? (int) round((float) $v * $displayUnit->toMillimeters()) : null;
+        $toMm = static fn (mixed $v): ?int => ($v !== null && $v !== '') ? (int) round((float) $v * $displayUnit->toMillimeters()) : null;
 
         $builder->addModelTransformer(new CallbackTransformer(
             static function (?Dimensions $dims) use ($toDisplay): array {

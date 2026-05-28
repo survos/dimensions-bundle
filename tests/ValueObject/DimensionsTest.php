@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle\Tests\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use Survos\DimensionsBundle\ValueObject\Dimension;
+use Survos\ShapeContracts\Length;
 use Survos\DimensionsBundle\ValueObject\Dimensions;
-use Survos\DimensionsBundle\ValueObject\Unit;
+use Survos\ShapeContracts\Unit;
 
 final class DimensionsTest extends TestCase
 {
@@ -34,7 +34,7 @@ final class DimensionsTest extends TestCase
     public function testPropertyHookAxes(): void
     {
         $d = new Dimensions(216, 279, null);
-        $this->assertInstanceOf(Dimension::class, $d->width);
+        $this->assertInstanceOf(Length::class, $d->width);
         $this->assertSame(216, $d->width->millimeters);
         $this->assertSame(279, $d->height->millimeters);
         $this->assertNull($d->depth);

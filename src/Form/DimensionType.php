@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Survos\DimensionsBundle\Form;
 
-use Survos\DimensionsBundle\ValueObject\Dimension;
-use Survos\DimensionsBundle\ValueObject\Unit;
+use Survos\ShapeContracts\Length;
+use Survos\ShapeContracts\Unit;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -20,14 +20,12 @@ final class DimensionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $displayUnit = Unit::from($options['display_unit']);
+        $displayUnit = Unit::fromAlias($options['display_unit']);
 
         $builder->addModelTransformer(new CallbackTransformer(
-            static fn (?Dimension $dim) use ($displayUnit): ?string
-                => $dim !== null ? (string) round($dim->to($displayUnit), 4) : null,
-            static fn (?string $value) use ($displayUnit): ?Dimension
-                => ($value !== null && $value !== '')
-                    ? new Dimension((int) round((float) $value * $displayUnit->toMillimeters()))
+            static fn (?Length $dim): ?string => $dim !== null ? (string) round($dim->to($displayUnit), 4) : null,
+            static fn (?string $value): ?Length => ($value !== null && $value !== '')
+                    ? new Length((int) round((float) $value * $displayUnit->toMillimeters()))
                     : null,
         ));
     }

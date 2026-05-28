@@ -6,10 +6,10 @@ namespace Survos\DimensionsBundle\Doctrine;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\IntegerType;
-use Survos\DimensionsBundle\ValueObject\Dimension;
+use Survos\ShapeContracts\Length;
 
 /**
- * Custom DBAL type for a single Dimension stored as INTEGER (mm).
+ * Custom DBAL type for a single Length stored as INTEGER (mm).
  * Use #[ORM\Column(type: DimensionType::NAME)] for single-axis columns
  * like thickness, diameter, paper_weight_mm, etc.
  */
@@ -22,12 +22,12 @@ final class DimensionType extends IntegerType
         return self::NAME;
     }
 
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Dimension
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Length
     {
         if ($value === null) {
             return null;
         }
-        return new Dimension((int) $value);
+        return new Length((int) $value);
     }
 
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?int
@@ -35,7 +35,7 @@ final class DimensionType extends IntegerType
         if ($value === null) {
             return null;
         }
-        if ($value instanceof Dimension) {
+        if ($value instanceof Length) {
             return $value->millimeters;
         }
         return (int) $value;

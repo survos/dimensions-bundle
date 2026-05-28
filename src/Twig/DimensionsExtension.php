@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle\Twig;
 
 use Survos\DimensionsBundle\Service\DimensionFormatter;
-use Survos\DimensionsBundle\ValueObject\Dimension;
+use Survos\ShapeContracts\Length;
 use Survos\DimensionsBundle\ValueObject\Dimensions;
+use Survos\ShapeContracts\Shape;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -29,7 +30,7 @@ final class DimensionsExtension extends AbstractExtension
      * {{ item.dimensions|dim }}            → "21.6 × 27.9 cm"
      * {{ item.dimensions|dim('in', 2) }}   → "8.50 × 11.00 in"
      */
-    public function dim(?Dimensions $dimensions, string $unit = 'cm', int $precision = 1): string
+    public function dim(Dimensions|Shape|null $dimensions, string $unit = 'cm', int $precision = 1): string
     {
         if ($dimensions === null || $dimensions->isEmpty) {
             return '';
@@ -40,7 +41,7 @@ final class DimensionsExtension extends AbstractExtension
     /**
      * {{ item.dimensions|dim_both }}   → "21.6 × 27.9 cm (8.5 × 11.0 in)"
      */
-    public function dimBoth(?Dimensions $dimensions, int $precision = 1): string
+    public function dimBoth(Dimensions|Shape|null $dimensions, int $precision = 1): string
     {
         if ($dimensions === null || $dimensions->isEmpty) {
             return '';
@@ -52,7 +53,7 @@ final class DimensionsExtension extends AbstractExtension
      * {{ item.thickness|dim_value }}         → "0.3 mm"
      * {{ item.thickness|dim_value('mm', 0) }} → "0"
      */
-    public function dimValue(Dimension|null $dimension, string $unit = 'mm', int $precision = 1): string
+    public function dimValue(Length|null $dimension, string $unit = 'mm', int $precision = 1): string
     {
         if ($dimension === null) {
             return '';
@@ -63,7 +64,7 @@ final class DimensionsExtension extends AbstractExtension
     /**
      * {{ item.dimensions|dim_area('cm') }}   → "602.6 cm²"
      */
-    public function dimArea(?Dimensions $dimensions, string $unit = 'cm', int $precision = 1): string
+    public function dimArea(Dimensions|Shape|null $dimensions, string $unit = 'cm', int $precision = 1): string
     {
         if ($dimensions === null) {
             return '';
@@ -74,7 +75,7 @@ final class DimensionsExtension extends AbstractExtension
     /**
      * {{ item.dimensions|dim_volume('cm') }}  → "1807.7 cm³"
      */
-    public function dimVolume(?Dimensions $dimensions, string $unit = 'cm', int $precision = 1): string
+    public function dimVolume(Dimensions|Shape|null $dimensions, string $unit = 'cm', int $precision = 1): string
     {
         if ($dimensions === null) {
             return '';

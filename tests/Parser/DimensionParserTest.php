@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Survos\DimensionsBundle\Tests\Parser;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Survos\DimensionsBundle\Parser\DimensionParser;
-use Survos\DimensionsBundle\ValueObject\Unit;
+use Survos\ShapeContracts\Unit;
 
 final class DimensionParserTest extends TestCase
 {
@@ -17,7 +18,7 @@ final class DimensionParserTest extends TestCase
         $this->parser = new DimensionParser('mm');
     }
 
-    /** @dataProvider singleDimensionProvider */
+    #[DataProvider('singleDimensionProvider')]
     public function testParseDimension(string $input, int $expectedMm): void
     {
         $dim = $this->parser->parseDimension($input);
@@ -38,7 +39,7 @@ final class DimensionParserTest extends TestCase
         ];
     }
 
-    /** @dataProvider compositeDimensionProvider */
+    #[DataProvider('compositeDimensionProvider')]
     public function testParseDimensions(string $input, int $w, int $h, ?int $d): void
     {
         $dims = $this->parser->parseDimensions($input);
