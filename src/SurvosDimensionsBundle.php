@@ -10,6 +10,7 @@ use Survos\DimensionsBundle\Form\DimensionsType;
 use Survos\DimensionsBundle\Parser\DimensionParser;
 use Survos\DimensionsBundle\Serializer\DimensionsNormalizer;
 use Survos\DimensionsBundle\Service\DimensionFormatter;
+use Survos\DimensionsBundle\Service\DimensionsNormalizer as DimensionsSourceNormalizer;
 use Survos\DimensionsBundle\Twig\DimensionsExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -45,6 +46,8 @@ class SurvosDimensionsBundle extends AbstractBundle
         $services->set(DimensionParser::class)->public()
             ->arg('$defaultUnit', $config['default_input_unit']);
 
+        $services->set(DimensionsSourceNormalizer::class)->public();
+
         // Twig integration (optional — only if Twig is installed)
         if (class_exists(\Twig\Extension\AbstractExtension::class)) {
             $services->set(DimensionsExtension::class)->public();
@@ -72,6 +75,12 @@ class SurvosDimensionsBundle extends AbstractBundle
                         DoctrineDimensionType::NAME => DoctrineDimensionType::class,
                     ],
                 ],
+            ]);
+        }
+
+        if ($builder->hasExtension('twig')) {
+            $builder->prependExtensionConfig('twig', [
+                'paths' => [dirname(__DIR__) . '/templates' => 'SurvosDimensions'],
             ]);
         }
     }

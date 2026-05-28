@@ -1,0 +1,37 @@
+{# @var dimensions iterable<array|object> structured dimension records #}
+{# @var weight     iterable<array|object> structured weight records    #}
+{# @var raw        string|null            unparsed fallback prose      #}
+{% set dimensions = dimensions ?? [] %}
+{% set weight     = weight     ?? [] %}
+{% set raw        = raw        ?? null %}
+
+{% if dimensions is not empty or weight is not empty %}
+    {% for dimension in dimensions %}
+        <p class="mb-2 d-flex align-items-center flex-wrap gap-2">
+            {{ ux_icon('radix-icons:dimensions') }}
+            {% for d in ['height','width','length','depth','radius'] %}
+                {% set dimValue = attribute(dimension, d) %}
+                {% if dimValue %}
+                    <span class="badge bg-light text-muted mb-0">
+                        <span title="{{ d|trans }}">
+                            {{ ux_icon(dimIcons[d]) }} {{ dimValue }} {{ attribute(dimension, 'units') }}
+                        </span>
+                    </span>
+                    {% if attribute(dimension, 'name') %}
+                        <span class="text-muted small">{{ attribute(dimension, 'name') }}</span>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </p>
+    {% endfor %}
+
+    {% for ww in weight %}
+        <p class="mb-2">
+            <span class="badge bg-light text-muted mb-0">
+                {{ ux_icon(dimIcons.weight) }} {{ attribute(ww, 'amount') }} {{ attribute(ww, 'units') }}
+            </span>
+        </p>
+    {% endfor %}
+{% elseif raw %}
+    <p class="mb-2 text-muted small font-monospace">{{ raw }}</p>
+{% endif %}

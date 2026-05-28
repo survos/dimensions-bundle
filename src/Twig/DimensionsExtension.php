@@ -8,12 +8,37 @@ use Survos\DimensionsBundle\Service\DimensionFormatter;
 use Survos\ShapeContracts\Length;
 use Survos\DimensionsBundle\ValueObject\Dimensions;
 use Survos\ShapeContracts\Shape;
+use Twig\Environment;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
-final class DimensionsExtension extends AbstractExtension
+final class DimensionsExtension extends AbstractExtension implements GlobalsInterface
 {
+    /** Iconify keys used by templates/dimensions.html.twig — override via Twig context if needed. */
+    public const DEFAULT_ICONS = [
+        'height' => 'tabler:arrow-autofit-height',
+        'width'  => 'tabler:arrow-autofit-width',
+        'length' => 'tabler:ruler',
+        'depth'  => 'tabler:box',
+        'radius' => 'tabler:circle-dashed',
+        'weight' => 'tabler:weight',
+    ];
+
     public function __construct(private readonly DimensionFormatter $formatter) {}
+
+    public function getGlobals(): array
+    {
+        return ['dimIcons' => self::DEFAULT_ICONS];
+    }
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('dim_render', [$this, 'render'], ['needs_environment' => true, 'is_safe' => ['html']]),
+        ];
+    }
 
     public function getFilters(): array
     {
@@ -24,6 +49,15 @@ final class DimensionsExtension extends AbstractExtension
             new TwigFilter('dim_area',   [$this, 'dimArea']),
             new TwigFilter('dim_volume', [$this, 'dimVolume']),
         ];
+    }
+
+    public function render(Environment $env, iterable|null $dimensions = [], iterable|null $weight = [], ?string $raw = null): string
+    {
+        return $env->render('@SurvosDimensions/dimensions.html.twig', [
+            'dimensions' => $dimensions ?? [],
+            'weight'     => $weight ?? [],
+            'raw'        => $raw,
+        ]);
     }
 
     /**
