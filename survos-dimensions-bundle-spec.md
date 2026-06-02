@@ -403,6 +403,16 @@ User-level override: a `DimensionPreference` interface that institutions can imp
 4. **Imperial fractional display** — `8 1/2 in` vs `8.5 in`. Probably not worth the complexity for v1; archival audiences are fine with decimals.
 5. **Integration with `survos/meili-bundle`** — should embedded `Dimensions` automatically expose searchable/filterable attributes? Likely yes via a normalizer that flattens to `width_mm`, `height_mm`, `depth_mm`, `area_mm2`, `volume_mm3` for filtering.
 
+## Session handoff — open items after structured-dimensions rollout
+
+These came out of wiring `DimensionsNormalizer` + the folio Twig template and pushing the auto-conversion into `Survos\ImportBundle\EventListener\NormalizeFallbackListener`. Not bugs — followups worth picking up next session.
+
+1. **Walters fractional inches** — parser handles the parenthetical metric (`(9.2 × 3.2 cm)`) but bails on the imperial part (`H: 3 5/8 × Diam: 1 1/4 in.`). With no parenthetical, those records land in `dimensionsRaw` only. Intentional for now; revisit if a museum source has imperial without a metric equivalent.
+2. **Diameter/radius semantics** — `DimensionsNormalizer::DIMENSION_KEYS` includes `diameter` and `radius` but `Shape`/`Dimensions` value objects only have width/height/depth. The fold accepts diameter into structured records, but it won't roundtrip through the Doctrine embeddable. Decide: synthesize `width=height=diameter`, store as a separate field, or keep "circular" records as record-only (not embeddable).
+3. **PhysicalObjectDto consumers** — `$dimensions` changed from `?string` to `?array`; added `?string $dimensionsRaw` and `?array $weight`. Not every consumer audited across mono/harvest/mus. Anything doing `(string) $dto->dimensions` or echoing it in a template will now render an array — grep before shipping.
+4. **Default Tabler icon names** in `DimensionsExtension::DEFAULT_ICONS` — picked plausible ones (`tabler:arrow-autofit-height`, etc.), not visually verified. Render a test row to confirm.
+5. **Cleveland / AWMM normalizers** — pass dimensions through as raw source; will be auto-converted by `NormalizeFallbackListener`. Worth running their normalize step once to confirm output shape matches SMK/Walters.
+
 ## Build order for Claude Code
 
 1. Skeleton: composer.json, bundle class, DI extension, configuration.
