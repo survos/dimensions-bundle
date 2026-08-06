@@ -28,7 +28,7 @@
         "phpunit/phpunit": "^13.0",
         "symfony/framework-bundle": "^8.1",
         "symfony/twig-bundle": "^8.1",
-        "twig/twig": "^3.0",
+        "twig/twig": "^3.0|^4.0",
         "symfony/form": "^8.1",
         "symfony/serializer": "^8.1",
         "api-platform/core": "^4.0"
