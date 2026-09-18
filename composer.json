@@ -31,7 +31,7 @@
         "twig/twig": "^3.0|^4.0",
         "symfony/form": "^8.1",
         "symfony/serializer": "^8.1",
-        "api-platform/core": "^4.0"
+        "api-platform/core": "^4.0 || ^5.0"
     },
     "suggest": {
         "symfony/twig-bundle": "To use the |dim, |dim_both, |dim_value Twig filters",
