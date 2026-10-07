@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Survos\DimensionsBundle\ValueObject;
 
-final readonly class Dimension implements \Stringable
+final class Dimension implements \Stringable
 {
-    public function __construct(public int $millimeters)
+    public function __construct(public readonly int $millimeters)
     {
         if ($millimeters < 0) {
             throw new \InvalidArgumentException('Dimension cannot be negative.');
