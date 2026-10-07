@@ -84,4 +84,38 @@ final class DimensionParserTest extends TestCase
         $dim = $this->parser->parseDimension('8.5', Unit::IN);
         $this->assertSame(216, $dim->millimeters);
     }
+    public function testMuseumAxisOrderIsExplicitAndDefaultStaysWidthFirst(): void
+    {
+        $input = '113 x 92.4 x 7.6 cm';
+        $museum = $this->parser->parseDimensions($input, order: 'hwd');
+        self::assertSame(924, $museum->widthMm);
+        self::assertSame(1130, $museum->heightMm);
+        self::assertSame(76, $museum->depthMm);
+        self::assertSame(1130, $this->parser->parseDimensions($input)->widthMm);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->parser->parseShape($input, order: 'guess');
+    }
+
+    public function testLabeledNpgSegmentsDiscardParentheticalInchDuplicates(): void
+    {
+        $input = 'Frame: 113 x 92.4 x 7.6 cm (44 1/2 x 36 3/8 x 3")'
+            . '; Stretcher: 92.2 × 72.2 × 2.2 cm (36 5/16 × 28 7/16 × 7/8")'
+            . "\nSight: 89 x 69 cm (35 x 27 in.); Sheet: 94 × 74 cm";
+        $segments = $this->parser->parseLabeledDimensions($input, order: 'hwd');
+        self::assertSame(['frame', 'stretcher', 'sight', 'sheet'], array_keys($segments));
+        self::assertSame(924, $segments['frame']->widthMm);
+        self::assertSame(1130, $segments['frame']->heightMm);
+        self::assertSame(76, $segments['frame']->depthMm);
+        self::assertSame(722, $segments['stretcher']->widthMm);
+        self::assertSame(690, $segments['sight']->widthMm);
+        self::assertSame(940, $segments['sheet']->heightMm);
+    }
+
+    public function testMalformedSegmentDoesNotHideValidFrameOrInventUnits(): void
+    {
+        $segments = $this->parser->parseLabeledDimensions('Image: unknown; Frame: 40 x 30 cm', order: 'hwd');
+        self::assertSame(['frame'], array_keys($segments));
+        self::assertSame([], $this->parser->parseLabeledDimensions('20 x 30'));
+        self::assertSame(200, $this->parser->parseLabeledDimensions('20 x 30', 'cm')['object']->widthMm);
+    }
 }
