@@ -19,7 +19,7 @@
         "symfony/config": "^8.1",
         "symfony/dependency-injection": "^8.1",
         "symfony/http-kernel": "^8.1",
-        "doctrine/orm": "^3.0",
+        "doctrine/orm": "^3.7",
         "doctrine/doctrine-bundle": "^3.2",
         "survos/kit-bundle": "^2.5",
         "survos/shape-contracts": "^2.5"
