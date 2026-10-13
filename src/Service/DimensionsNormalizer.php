@@ -28,7 +28,8 @@ final class DimensionsNormalizer
 
     public function __construct(
         private readonly DimensionParser $parser,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array{dimensions: list<array<string,mixed>>|null, dimensionsRaw: string|null, weight: list<array<string,mixed>>|null}
@@ -37,7 +38,7 @@ final class DimensionsNormalizer
     {
         $empty = ['dimensions' => null, 'dimensionsRaw' => null, 'weight' => null];
 
-        if ($source === null || $source === '' || $source === []) {
+        if (null === $source || '' === $source || [] === $source) {
             return $empty;
         }
 
@@ -54,6 +55,7 @@ final class DimensionsNormalizer
 
     /**
      * @param array<mixed> $source
+     *
      * @return array{dimensions: list<array<string,mixed>>|null, dimensionsRaw: string|null, weight: list<array<string,mixed>>|null}
      */
     private function fromArray(array $source): array
@@ -66,7 +68,8 @@ final class DimensionsNormalizer
                 }
                 $records[] = $this->normalizeStructuredRow($row);
             }
-            return ['dimensions' => $records !== [] ? $records : null, 'dimensionsRaw' => null, 'weight' => null];
+
+            return ['dimensions' => [] !== $records ? $records : null, 'dimensionsRaw' => null, 'weight' => null];
         }
 
         if ($this->looksLikeTyped($source)) {
@@ -82,19 +85,19 @@ final class DimensionsNormalizer
     private function fromString(string $source): array
     {
         $source = trim($source);
-        if ($source === '') {
+        if ('' === $source) {
             return ['dimensions' => null, 'dimensionsRaw' => null, 'weight' => null];
         }
 
         if (preg_match('/\(([^()]*(?:mm|cm|m|in|ft)[^()]*)\)/i', $source, $m)) {
             $record = $this->tryParseShape($m[1]);
-            if ($record !== null) {
+            if (null !== $record) {
                 return ['dimensions' => [$record], 'dimensionsRaw' => $source, 'weight' => null];
             }
         }
 
         $record = $this->tryParseShape($source);
-        if ($record !== null) {
+        if (null !== $record) {
             return ['dimensions' => [$record], 'dimensionsRaw' => null, 'weight' => null];
         }
 
@@ -117,9 +120,16 @@ final class DimensionsNormalizer
     private function shapeToRecord(Shape $shape): array
     {
         $record = ['units' => 'cm'];
-        if ($shape->width  !== null) { $record['width']  = round($shape->width->millimeters  / 10, 2); }
-        if ($shape->height !== null) { $record['height'] = round($shape->height->millimeters / 10, 2); }
-        if ($shape->depth  !== null) { $record['depth']  = round($shape->depth->millimeters  / 10, 2); }
+        if (null !== $shape->width) {
+            $record['width'] = round($shape->width->millimeters / 10, 2);
+        }
+        if (null !== $shape->height) {
+            $record['height'] = round($shape->height->millimeters / 10, 2);
+        }
+        if (null !== $shape->depth) {
+            $record['depth'] = round($shape->depth->millimeters / 10, 2);
+        }
+
         return $record;
     }
 
@@ -135,8 +145,10 @@ final class DimensionsNormalizer
                     return true;
                 }
             }
+
             return false;
         }
+
         return false;
     }
 
@@ -147,8 +159,10 @@ final class DimensionsNormalizer
             if (!is_array($row)) {
                 return false;
             }
+
             return array_key_exists('type', $row) && array_key_exists('value', $row);
         }
+
         return false;
     }
 
@@ -167,11 +181,13 @@ final class DimensionsNormalizer
         if (isset($row['name']) && is_scalar($row['name'])) {
             $out['name'] = (string) $row['name'];
         }
+
         return $out;
     }
 
     /**
      * @param array<mixed> $items
+     *
      * @return array{dimensions: list<array<string,mixed>>|null, dimensionsRaw: string|null, weight: list<array<string,mixed>>|null}
      */
     private function foldTyped(array $items): array
@@ -195,13 +211,13 @@ final class DimensionsNormalizer
                 }
             }
 
-            if ($type === null || $value === null) {
+            if (null === $type || null === $value) {
                 continue;
             }
 
-            if ($type === 'weight') {
+            if ('weight' === $type) {
                 $entry = ['amount' => $value, 'units' => $unit ?? 'g'];
-                if ($label !== '') {
+                if ('' !== $label) {
                     $entry['name'] = $label;
                 }
                 $weight[] = $entry;
@@ -214,10 +230,10 @@ final class DimensionsNormalizer
 
             $groups[$label] ??= ['units' => $unit ?? 'cm'];
             $groups[$label][$type] = $value;
-            if ($unit !== null) {
+            if (null !== $unit) {
                 $groups[$label]['units'] = $unit;
             }
-            if ($label !== '' && !isset($groups[$label]['name'])) {
+            if ('' !== $label && !isset($groups[$label]['name'])) {
                 $groups[$label]['name'] = $label;
             }
         }
@@ -225,9 +241,9 @@ final class DimensionsNormalizer
         $dimensions = array_values($groups);
 
         return [
-            'dimensions'    => $dimensions !== [] ? $dimensions : null,
+            'dimensions' => [] !== $dimensions ? $dimensions : null,
             'dimensionsRaw' => null,
-            'weight'        => $weight !== [] ? $weight : null,
+            'weight' => [] !== $weight ? $weight : null,
         ];
     }
 

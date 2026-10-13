@@ -23,7 +23,7 @@ final class Dimensions implements \Stringable
         public readonly ?int $depthMm = null,
     ) {
         foreach ([$widthMm, $heightMm, $depthMm] as $v) {
-            if ($v !== null && $v < 0) {
+            if (null !== $v && $v < 0) {
                 throw new \InvalidArgumentException('Dimensions cannot be negative.');
             }
         }
@@ -34,19 +34,19 @@ final class Dimensions implements \Stringable
     public ?Length $depth { get => Length::fromMillimeters($this->depthMm); }
 
     public ?int $area {
-        get => $this->widthMm !== null && $this->heightMm !== null
+        get => null !== $this->widthMm && null !== $this->heightMm
             ? $this->widthMm * $this->heightMm
             : null;
     }
 
     public ?int $volume {
-        get => $this->widthMm !== null && $this->heightMm !== null && $this->depthMm !== null
+        get => null !== $this->widthMm && null !== $this->heightMm && null !== $this->depthMm
             ? $this->widthMm * $this->heightMm * $this->depthMm
             : null;
     }
 
-    public bool $is2D { get => $this->depthMm === null; }
-    public bool $isEmpty { get => $this->widthMm === null && $this->heightMm === null && $this->depthMm === null; }
+    public bool $is2D { get => null === $this->depthMm; }
+    public bool $isEmpty { get => null === $this->widthMm && null === $this->heightMm && null === $this->depthMm; }
 
     public static function fromShape(Shape $shape): self
     {
@@ -70,7 +70,7 @@ final class Dimensions implements \Stringable
 
     public function isFlat(int $thresholdMm = 5): bool
     {
-        return $this->depthMm === null || $this->depthMm < $thresholdMm;
+        return null === $this->depthMm || $this->depthMm < $thresholdMm;
     }
 
     public function format(Unit|string $unit = Unit::CM, int $precision = 1): string
@@ -78,7 +78,7 @@ final class Dimensions implements \Stringable
         $unit = is_string($unit) ? Unit::fromAlias($unit) : $unit;
         $parts = [];
         foreach ([$this->widthMm, $this->heightMm, $this->depthMm] as $mm) {
-            if ($mm === null) {
+            if (null === $mm) {
                 continue;
             }
             $parts[] = number_format($mm / $unit->toMillimeters(), $precision, '.', '');
@@ -87,7 +87,7 @@ final class Dimensions implements \Stringable
             return '';
         }
 
-        return implode(' × ', $parts) . ' ' . $unit->symbol();
+        return implode(' × ', $parts).' '.$unit->symbol();
     }
 
     public function __toString(): string

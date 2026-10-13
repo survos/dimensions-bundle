@@ -86,6 +86,6 @@ final class Dimension implements \Stringable
 
     public function __toString(): string
     {
-        return $this->millimeters . ' mm';
+        return $this->millimeters.' mm';
     }
 }

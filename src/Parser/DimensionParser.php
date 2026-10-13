@@ -13,18 +13,20 @@ final class DimensionParser
 {
     private const UNIT_PATTERN = 'mm|cm|m|in|ft';
 
-    public function __construct(private readonly string $defaultUnit = 'mm') {}
+    public function __construct(private readonly string $defaultUnit = 'mm')
+    {
+    }
 
     public function parseDimension(string $input, Unit|string|null $defaultUnit = null): Length
     {
-        $defaultUnit = $defaultUnit === null ? Unit::fromAlias($this->defaultUnit) : (is_string($defaultUnit) ? Unit::fromAlias($defaultUnit) : $defaultUnit);
+        $defaultUnit = null === $defaultUnit ? Unit::fromAlias($this->defaultUnit) : (is_string($defaultUnit) ? Unit::fromAlias($defaultUnit) : $defaultUnit);
         $input = trim($input);
 
         if (preg_match('/^(\d+(?:\.\d+)?)\s*ft\s+(\d+(?:\.\d+)?)\s*in$/i', $input, $m)) {
             return new Length((int) round((float) $m[1] * 304.8 + (float) $m[2] * 25.4));
         }
 
-        if (preg_match('/^(\d+(?:\.\d+)?)\s*(' . self::UNIT_PATTERN . ')\s*$/i', $input, $m)) {
+        if (preg_match('/^(\d+(?:\.\d+)?)\s*('.self::UNIT_PATTERN.')\s*$/i', $input, $m)) {
             return Length::from((float) $m[1], Unit::fromAlias($m[2]));
         }
 
@@ -37,7 +39,7 @@ final class DimensionParser
 
     public function parseShape(string $input, Unit|string|null $defaultUnit = null, string $order = 'whd'): Shape
     {
-        $defaultUnit = $defaultUnit === null ? Unit::fromAlias($this->defaultUnit) : (is_string($defaultUnit) ? Unit::fromAlias($defaultUnit) : $defaultUnit);
+        $defaultUnit = null === $defaultUnit ? Unit::fromAlias($this->defaultUnit) : (is_string($defaultUnit) ? Unit::fromAlias($defaultUnit) : $defaultUnit);
         $input = trim($input);
         if (!in_array($order, ['whd', 'hwd'], true)) {
             throw new \InvalidArgumentException('Axis order must be whd or hwd.');
@@ -50,7 +52,7 @@ final class DimensionParser
 
         $lastPart = trim((string) end($parts));
         $sharedUnit = $defaultUnit;
-        if (preg_match('/^(.*?)\s*(' . self::UNIT_PATTERN . ')\s*$/i', $lastPart, $m)) {
+        if (preg_match('/^(.*?)\s*('.self::UNIT_PATTERN.')\s*$/i', $lastPart, $m)) {
             $sharedUnit = Unit::fromAlias($m[2]);
             $parts[count($parts) - 1] = trim($m[1]);
         }
@@ -58,8 +60,8 @@ final class DimensionParser
         $mms = array_map(fn (string $part): int => $this->parsePartToMm(trim($part), $sharedUnit), $parts);
 
         return Shape::fromMillimeters(
-            widthMm: $mms[$order === 'hwd' ? 1 : 0],
-            heightMm: $mms[$order === 'hwd' ? 0 : 1],
+            widthMm: $mms['hwd' === $order ? 1 : 0],
+            heightMm: $mms['hwd' === $order ? 0 : 1],
             depthMm: $mms[2] ?? null,
             source: $input,
         );
@@ -86,14 +88,23 @@ final class DimensionParser
         $input = trim(preg_replace('/\([^()]*\)/u', '', $input));
         $parts = preg_split('/(?:^|[;\r\n]\s*)([\p{L}][\p{L} ]*):\s*/u', $input, flags: PREG_SPLIT_DELIM_CAPTURE);
         $segments = [];
-        if (trim($parts[0]) !== '') { $segments['object'] = trim($parts[0]); }
-        for ($i = 1; $i < count($parts); $i += 2) { $segments[strtolower(trim($parts[$i]))] = trim($parts[$i + 1], " \t\r\n;"); }
+        if ('' !== trim($parts[0])) {
+            $segments['object'] = trim($parts[0]);
+        }
+        for ($i = 1; $i < count($parts); $i += 2) {
+            $segments[strtolower(trim($parts[$i]))] = trim($parts[$i + 1], " \t\r\n;");
+        }
         $parsed = [];
         foreach ($segments as $label => $measurement) {
-            if ($defaultUnit === null && !preg_match('/(?:'.self::UNIT_PATTERN.')\s*$/i', $measurement)) { continue; }
-            try { $parsed[$label] = $this->parseDimensions($measurement, $defaultUnit, $order); }
-            catch (\InvalidArgumentException) { /* One malformed segment must not discard a valid frame. */ }
+            if (null === $defaultUnit && !preg_match('/(?:'.self::UNIT_PATTERN.')\s*$/i', $measurement)) {
+                continue;
+            }
+            try {
+                $parsed[$label] = $this->parseDimensions($measurement, $defaultUnit, $order);
+            } catch (\InvalidArgumentException) { /* One malformed segment must not discard a valid frame. */
+            }
         }
+
         return $parsed;
     }
 
@@ -103,7 +114,7 @@ final class DimensionParser
             return (int) round((float) $m[1] * 304.8 + (float) $m[2] * 25.4);
         }
 
-        if (preg_match('/^(\d+(?:\.\d+)?)\s*(' . self::UNIT_PATTERN . ')\s*$/i', $part, $m)) {
+        if (preg_match('/^(\d+(?:\.\d+)?)\s*('.self::UNIT_PATTERN.')\s*$/i', $part, $m)) {
             return (int) round((float) $m[1] * Unit::fromAlias($m[2])->toMillimeters());
         }
 

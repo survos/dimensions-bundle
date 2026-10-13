@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle\Tests\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use Survos\ShapeContracts\Length;
 use Survos\DimensionsBundle\ValueObject\Dimensions;
+use Survos\ShapeContracts\Length;
 use Survos\ShapeContracts\Unit;
 
 final class DimensionsTest extends TestCase

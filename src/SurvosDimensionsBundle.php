@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Survos\DimensionsBundle;
 
 use Survos\DimensionsBundle\Doctrine\DimensionType as DoctrineDimensionType;
-use Survos\DimensionsBundle\Form\DimensionType as DimensionFormType;
 use Survos\DimensionsBundle\Form\DimensionsType;
+use Survos\DimensionsBundle\Form\DimensionType as DimensionFormType;
 use Survos\DimensionsBundle\Parser\DimensionParser;
 use Survos\DimensionsBundle\Serializer\DimensionsNormalizer;
 use Survos\DimensionsBundle\Service\DimensionFormatter;
@@ -80,7 +80,7 @@ class SurvosDimensionsBundle extends AbstractBundle
 
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', [
-                'paths' => [dirname(__DIR__) . '/templates' => 'SurvosDimensions'],
+                'paths' => [dirname(__DIR__).'/templates' => 'SurvosDimensions'],
             ]);
         }
     }

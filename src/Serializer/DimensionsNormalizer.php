@@ -46,7 +46,7 @@ final class DimensionsNormalizer implements NormalizerInterface, DenormalizerInt
 
         $shape = Shape::fromNormalizedArray($this->normalizeInputKeys($data));
 
-        return $type === Shape::class ? $shape : Dimensions::fromShape($shape);
+        return Shape::class === $type ? $shape : Dimensions::fromShape($shape);
     }
 
     public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
@@ -63,8 +63,8 @@ final class DimensionsNormalizer implements NormalizerInterface, DenormalizerInt
     private function normalizeInputKeys(array $data): array
     {
         foreach (['width', 'height', 'depth', 'length', 'thickness', 'diameter'] as $key) {
-            $mmKey = $key . 'Mm';
-            $legacyMmKey = $key . '_mm';
+            $mmKey = $key.'Mm';
+            $legacyMmKey = $key.'_mm';
             if (!array_key_exists($mmKey, $data) && array_key_exists($legacyMmKey, $data)) {
                 $data[$mmKey] = $data[$legacyMmKey];
             }

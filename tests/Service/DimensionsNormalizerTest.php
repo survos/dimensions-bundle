@@ -73,7 +73,7 @@ final class DimensionsNormalizerTest extends TestCase
         $this->assertCount(1, $result['dimensions']);
         $this->assertSame(21.6, $result['dimensions'][0]['height']);
         $this->assertSame(27.9, $result['dimensions'][0]['width']);
-        $this->assertSame('cm',  $result['dimensions'][0]['units']);
+        $this->assertSame('cm', $result['dimensions'][0]['units']);
         $this->assertNull($result['weight']);
     }
 
@@ -115,8 +115,8 @@ final class DimensionsNormalizerTest extends TestCase
         $this->assertNotNull($result['dimensions']);
         $this->assertCount(1, $result['dimensions']);
         $this->assertSame('cm', $result['dimensions'][0]['units']);
-        $this->assertSame(9.2,  $result['dimensions'][0]['width']);
-        $this->assertSame(3.2,  $result['dimensions'][0]['height']);
+        $this->assertSame(9.2, $result['dimensions'][0]['width']);
+        $this->assertSame(3.2, $result['dimensions'][0]['height']);
         $this->assertSame($source, $result['dimensionsRaw']);
     }
 

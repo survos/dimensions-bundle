@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Survos\DimensionsBundle\Service;
 
-use Survos\ShapeContracts\Length;
 use Survos\DimensionsBundle\ValueObject\Dimensions;
+use Survos\ShapeContracts\Length;
 use Survos\ShapeContracts\Shape;
 use Survos\ShapeContracts\Unit;
 
@@ -16,7 +16,8 @@ final class DimensionFormatter
         private readonly int $defaultPrecision = 1,
         private readonly bool $showBothUnits = false,
         private readonly ?DimensionPreferenceInterface $preference = null,
-    ) {}
+    ) {
+    }
 
     public function formatDimensions(Dimensions|Shape $dimensions, ?string $unit = null, ?int $precision = null): string
     {
@@ -37,10 +38,10 @@ final class DimensionFormatter
         }
 
         $precision ??= $this->defaultPrecision;
-        $primary   = $this->resolveUnit();
-        $secondary = ($primary === 'cm') ? 'in' : 'cm';
+        $primary = $this->resolveUnit();
+        $secondary = ('cm' === $primary) ? 'in' : 'cm';
 
-        $primaryStr   = $dimensions->format(Unit::fromAlias($primary), $precision);
+        $primaryStr = $dimensions->format(Unit::fromAlias($primary), $precision);
         $secondaryStr = $dimensions->format(Unit::fromAlias($secondary), $precision);
 
         return "{$primaryStr} ({$secondaryStr})";
@@ -48,10 +49,10 @@ final class DimensionFormatter
 
     public function formatDimension(Length $dimension, ?string $unit = null, ?int $precision = null): string
     {
-        $unitObj   = Unit::fromAlias($unit ?? $this->resolveUnit());
+        $unitObj = Unit::fromAlias($unit ?? $this->resolveUnit());
         $precision = $precision ?? $this->defaultPrecision;
 
-        return number_format($dimension->to($unitObj), $precision, '.', '') . ' ' . $unitObj->symbol();
+        return number_format($dimension->to($unitObj), $precision, '.', '').' '.$unitObj->symbol();
     }
 
     /** Returns null when width or height is missing. */
@@ -61,14 +62,14 @@ final class DimensionFormatter
             $dimensions = Dimensions::fromShape($dimensions);
         }
 
-        if ($dimensions->area === null) {
+        if (null === $dimensions->area) {
             return null;
         }
         $precision = $precision ?? $this->defaultPrecision;
-        $factor    = Unit::fromAlias($unit)->toMillimeters();
-        $area      = $dimensions->area / ($factor ** 2);
+        $factor = Unit::fromAlias($unit)->toMillimeters();
+        $area = $dimensions->area / ($factor ** 2);
 
-        return number_format($area, $precision, '.', '') . ' ' . $unit . '²';
+        return number_format($area, $precision, '.', '').' '.$unit.'²';
     }
 
     /** Returns null when any axis is missing. */
@@ -78,14 +79,14 @@ final class DimensionFormatter
             $dimensions = Dimensions::fromShape($dimensions);
         }
 
-        if ($dimensions->volume === null) {
+        if (null === $dimensions->volume) {
             return null;
         }
         $precision = $precision ?? $this->defaultPrecision;
-        $factor    = Unit::fromAlias($unit)->toMillimeters();
-        $volume    = $dimensions->volume / ($factor ** 3);
+        $factor = Unit::fromAlias($unit)->toMillimeters();
+        $volume = $dimensions->volume / ($factor ** 3);
 
-        return number_format($volume, $precision, '.', '') . ' ' . $unit . '³';
+        return number_format($volume, $precision, '.', '').' '.$unit.'³';
     }
 
     private function resolveUnit(): string

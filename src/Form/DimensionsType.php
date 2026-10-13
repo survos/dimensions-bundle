@@ -26,37 +26,38 @@ final class DimensionsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $displayUnit = Unit::fromAlias($options['display_unit']);
-        $sym         = $displayUnit->symbol();
+        $sym = $displayUnit->symbol();
 
         $numberOpts = ['required' => false, 'scale' => 4, 'attr' => ['step' => 'any', 'min' => '0']];
 
         $builder
-            ->add('width',  NumberType::class, array_merge($numberOpts, ['label' => "Width ({$sym})"]))
+            ->add('width', NumberType::class, array_merge($numberOpts, ['label' => "Width ({$sym})"]))
             ->add('height', NumberType::class, array_merge($numberOpts, ['label' => "Height ({$sym})"]));
 
         if ($options['allow_depth']) {
             $builder->add('depth', NumberType::class, array_merge($numberOpts, ['label' => "Depth ({$sym})"]));
         }
 
-        $toDisplay = static fn (?int $mm): ?float => $mm !== null ? round($mm / $displayUnit->toMillimeters(), 4) : null;
+        $toDisplay = static fn (?int $mm): ?float => null !== $mm ? round($mm / $displayUnit->toMillimeters(), 4) : null;
 
-        $toMm = static fn (mixed $v): ?int => ($v !== null && $v !== '') ? (int) round((float) $v * $displayUnit->toMillimeters()) : null;
+        $toMm = static fn (mixed $v): ?int => (null !== $v && '' !== $v) ? (int) round((float) $v * $displayUnit->toMillimeters()) : null;
 
         $builder->addModelTransformer(new CallbackTransformer(
             static function (?Dimensions $dims) use ($toDisplay): array {
                 return [
-                    'width'  => $toDisplay($dims?->widthMm),
+                    'width' => $toDisplay($dims?->widthMm),
                     'height' => $toDisplay($dims?->heightMm),
-                    'depth'  => $toDisplay($dims?->depthMm),
+                    'depth' => $toDisplay($dims?->depthMm),
                 ];
             },
             static function (array $data) use ($toMm): ?Dimensions {
-                $w = $toMm($data['width']  ?? null);
+                $w = $toMm($data['width'] ?? null);
                 $h = $toMm($data['height'] ?? null);
-                $d = $toMm($data['depth']  ?? null);
-                if ($w === null && $h === null && $d === null) {
+                $d = $toMm($data['depth'] ?? null);
+                if (null === $w && null === $h && null === $d) {
                     return null;
                 }
+
                 return new Dimensions($w, $h, $d);
             },
         ));
@@ -68,8 +69,8 @@ final class DimensionsType extends AbstractType
 
         $resolver->setDefaults([
             'display_unit' => 'cm',
-            'allow_depth'  => true,
-            'label'        => false,
+            'allow_depth' => true,
+            'label' => false,
         ]);
 
         $resolver->setAllowedValues('display_unit', $validUnits);

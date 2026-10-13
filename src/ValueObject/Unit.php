@@ -8,7 +8,7 @@ enum Unit: string
 {
     case MM = 'mm';
     case CM = 'cm';
-    case M  = 'm';
+    case M = 'm';
     case IN = 'in';
     case FT = 'ft';
 
@@ -17,7 +17,7 @@ enum Unit: string
         return match ($this) {
             self::MM => 1.0,
             self::CM => 10.0,
-            self::M  => 1000.0,
+            self::M => 1000.0,
             self::IN => 25.4,
             self::FT => 304.8,
         };

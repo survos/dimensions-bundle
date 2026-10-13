@@ -33,20 +33,22 @@ final class DimensionType extends Type
 
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Length
     {
-        if ($value === null) {
+        if (null === $value) {
             return null;
         }
+
         return new Length((int) $value);
     }
 
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?int
     {
-        if ($value === null) {
+        if (null === $value) {
             return null;
         }
         if ($value instanceof Length) {
             return $value->millimeters;
         }
+
         return (int) $value;
     }
 

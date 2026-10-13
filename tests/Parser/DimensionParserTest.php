@@ -28,14 +28,14 @@ final class DimensionParserTest extends TestCase
     public static function singleDimensionProvider(): array
     {
         return [
-            'bare mm'              => ['216',       216],
-            'inches decimal'       => ['8.5 in',    216],
-            'inches uppercase'     => ['8.5 IN',    216],
-            'cm decimal'           => ['21.6 cm',   216],
+            'bare mm' => ['216',       216],
+            'inches decimal' => ['8.5 in',    216],
+            'inches uppercase' => ['8.5 IN',    216],
+            'cm decimal' => ['21.6 cm',   216],
             'compound feet+inches' => ['4ft 2in',  1270],
-            'one foot'             => ['1ft 0in',   305],
-            'zero'                 => ['0',           0],
-            'one meter'            => ['1 m',       1000],
+            'one foot' => ['1ft 0in',   305],
+            'zero' => ['0',           0],
+            'one meter' => ['1 m',       1000],
         ];
     }
 
@@ -43,20 +43,20 @@ final class DimensionParserTest extends TestCase
     public function testParseDimensions(string $input, int $w, int $h, ?int $d): void
     {
         $dims = $this->parser->parseDimensions($input);
-        $this->assertSame($w, $dims->widthMm,  "Width of '{$input}'");
+        $this->assertSame($w, $dims->widthMm, "Width of '{$input}'");
         $this->assertSame($h, $dims->heightMm, "Height of '{$input}'");
-        $this->assertSame($d, $dims->depthMm,  "Depth of '{$input}'");
+        $this->assertSame($d, $dims->depthMm, "Depth of '{$input}'");
     }
 
     public static function compositeDimensionProvider(): array
     {
         return [
-            'unicode × with in'       => ['8.5 × 11 in',       216, 279, null],
-            'ascii x with cm'         => ['21.6 x 27.9 cm',    216, 279, null],
-            'uppercase X with cm'     => ['21.6 X 27.9 cm',    216, 279, null],
-            'three dims in inches'    => ['10 × 12 × 3 in',    254, 305,   76],
-            'three dims in cm'        => ['10 × 20 × 5 cm',    100, 200,   50],
-            'bare mm values'          => ['210 × 297',          210, 297, null],
+            'unicode × with in' => ['8.5 × 11 in',       216, 279, null],
+            'ascii x with cm' => ['21.6 x 27.9 cm',    216, 279, null],
+            'uppercase X with cm' => ['21.6 X 27.9 cm',    216, 279, null],
+            'three dims in inches' => ['10 × 12 × 3 in',    254, 305,   76],
+            'three dims in cm' => ['10 × 20 × 5 cm',    100, 200,   50],
+            'bare mm values' => ['210 × 297',          210, 297, null],
         ];
     }
 
@@ -84,6 +84,7 @@ final class DimensionParserTest extends TestCase
         $dim = $this->parser->parseDimension('8.5', Unit::IN);
         $this->assertSame(216, $dim->millimeters);
     }
+
     public function testMuseumAxisOrderIsExplicitAndDefaultStaysWidthFirst(): void
     {
         $input = '113 x 92.4 x 7.6 cm';
@@ -99,8 +100,8 @@ final class DimensionParserTest extends TestCase
     public function testLabeledNpgSegmentsDiscardParentheticalInchDuplicates(): void
     {
         $input = 'Frame: 113 x 92.4 x 7.6 cm (44 1/2 x 36 3/8 x 3")'
-            . '; Stretcher: 92.2 × 72.2 × 2.2 cm (36 5/16 × 28 7/16 × 7/8")'
-            . "\nSight: 89 x 69 cm (35 x 27 in.); Sheet: 94 × 74 cm";
+            .'; Stretcher: 92.2 × 72.2 × 2.2 cm (36 5/16 × 28 7/16 × 7/8")'
+            ."\nSight: 89 x 69 cm (35 x 27 in.); Sheet: 94 × 74 cm";
         $segments = $this->parser->parseLabeledDimensions($input, order: 'hwd');
         self::assertSame(['frame', 'stretcher', 'sight', 'sheet'], array_keys($segments));
         self::assertSame(924, $segments['frame']->widthMm);

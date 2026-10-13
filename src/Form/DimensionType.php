@@ -23,8 +23,8 @@ final class DimensionType extends AbstractType
         $displayUnit = Unit::fromAlias($options['display_unit']);
 
         $builder->addModelTransformer(new CallbackTransformer(
-            static fn (?Length $dim): ?string => $dim !== null ? (string) round($dim->to($displayUnit), 4) : null,
-            static fn (?string $value): ?Length => ($value !== null && $value !== '')
+            static fn (?Length $dim): ?string => null !== $dim ? (string) round($dim->to($displayUnit), 4) : null,
+            static fn (?string $value): ?Length => (null !== $value && '' !== $value)
                     ? new Length((int) round((float) $value * $displayUnit->toMillimeters()))
                     : null,
         ));
@@ -34,7 +34,7 @@ final class DimensionType extends AbstractType
     {
         $resolver->setDefaults([
             'display_unit' => 'mm',
-            'attr'         => ['step' => 'any', 'min' => '0'],
+            'attr' => ['step' => 'any', 'min' => '0'],
         ]);
         $resolver->setAllowedValues('display_unit', array_column(Unit::cases(), 'value'));
     }
